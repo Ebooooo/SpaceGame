@@ -64,3 +64,53 @@ class Space {
     this.ctx.fillStyle = "#ffffff";
     this.ctx.fillText(`LEVEL: ${this.level + 1}, SCORE: ${this.score}, BEST: ${this.bestScore}`, 10, 20);
   }
+  private input(event) {
+    this.playerX = event.clientX - this.canvas.getBoundingClientRect().left;
+    this.playerY = event.clientY - this.canvas.getBoundingClientRect().top;
+  }
+
+  private moveObstacles() {
+    for(const obstacle of this.obstacles) {
+      obstacle.moveDown();
+    }
+
+    if (this.obstacles.length < 10 + this.level * 3) {
+      this.obstacles.push(new Obstacle(Math.random() * this.canvas.width, (Math.random() * -250) - 50, (Math.random() * 3) + 2));
+    }
+  }
+
+  private detectCollision() {
+    for(const obstacle of this.obstacles) {
+      const distance = Math.sqrt(Math.pow(this.playerX - obstacle.positionX, 2) + Math.pow(this.playerY - obstacle.positionY, 2))
+
+      if (distance < 32 / 1.5) {
+        this.GameOver();
+      }
+
+      if (obstacle.positionY > this.canvas.height + 32) {
+        this.obstacles = this.obstacles.filter(element => element !== obstacle);
+        this.score++;
+
+        if (this.bestScore < this.score) {
+          this.bestScore = this.score;
+        }
+
+        if (this.score > 0 && this.score % 25 === 0) {
+          this.level++;
+          this.bgRed = Math.round(Math.random() * 100);
+          this.bgBlue = Math.round(Math.random() * 100);
+          this.bgGreen = Math.round(Math.random() * 100);
+        }
+      }
+    }
+  }
+
+  private GameOver() {
+    window.alert('Game over! Your score is ' + this.score + ' Try again!');
+    this.obstacles = new Array<Obstacle>();
+    this.score = 0;
+    this.level = 0;
+    this.playerX = this.canvas.width / 2;
+    this.playerY = this.canvas.height - 32;
+  }
+}
